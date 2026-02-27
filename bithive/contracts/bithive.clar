@@ -564,3 +564,73 @@
     )
   )
 )
+
+;; ========================================
+;; Public Functions - Claiming & Refunds
+;; ========================================
+
+;; Claim funds for successful campaign (owner only)
+(define-public (claim-funds (campaign-id uint) (sbtc-contract <sip-010-trait>))
+  (let
+    (
+      (caller tx-sender)
+    )
+    (match (map-get? campaigns campaign-id)
+      campaign
+      (let
+        (
+          (raised (get raised campaign))
+          (fee (calculate-fee raised))
+          (owner-amount (- raised fee))
+          (campaign-owner (get owner campaign))
+          (current-treasury (var-get treasury))
+        )
+        (asserts! (is-eq campaign-owner caller) err-not-campaign-owner)
+        (asserts! (> stacks-block-height (get end-block campaign)) err-campaign-active)
+        (asserts! (>= raised (get goal campaign)) err-goal-not-reached)
+        (asserts! (not (get claimed campaign)) err-already-claimed)
+        
+        ;; Mark as claimed first (prevent reentrancy)
+        (map-set campaigns campaign-id 
+          (merge campaign { claimed: true })
+        )
+        
+        ;; Transfer funds to owner (minus fee) - contract sends to owner
+        (try! (as-contract? ((with-all-assets-unsafe))
+          (try! (contract-call? sbtc-contract transfer owner-amount tx-sender campaign-owner none))))
+        
+        ;; Transfer fee to treasury
+        (if (> fee u0)
+          (try! (as-contract? ((with-all-assets-unsafe))
+            (try! (contract-call? sbtc-contract transfer fee tx-sender current-treasury none))))
+          true
+        )
+        
+        ;; Update global stats
+        (var-set total-raised (+ (var-get total-raised) raised))
+        (var-set successful-campaigns (+ (var-get successful-campaigns) u1))
+        
+        ;; Update creator stats
+        (let ((stats (get-creator-stats caller)))
+          (map-set creator-stats caller 
+            (merge stats {
+              campaigns-successful: (+ (get campaigns-successful stats) u1),
+              total-raised: (+ (get total-raised stats) raised)
+            })
+          )
+        )
+        
+        (print {
+          event: "funds-claimed",
+          campaign-id: campaign-id,
+          owner: caller,
+          amount: owner-amount,
+          fee: fee
+        })
+        
+        (ok { campaign-id: campaign-id, claimed: owner-amount, fee: fee })
+      )
+      err-campaign-not-found
+    )
+  )
+)
