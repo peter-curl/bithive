@@ -216,3 +216,37 @@
     false
   )
 )
+
+(define-read-only (calculate-fee (amount uint))
+  (/ (* amount platform-fee-bps) bps-denominator)
+)
+
+(define-read-only (get-progress-percentage (campaign-id uint))
+  (match (map-get? campaigns campaign-id)
+    campaign 
+    (if (> (get goal campaign) u0)
+      (/ (* (get raised campaign) u100) (get goal campaign))
+      u0
+    )
+    u0
+  )
+)
+
+(define-read-only (get-time-remaining (campaign-id uint))
+  (match (map-get? campaigns campaign-id)
+    campaign 
+    (if (> (get end-block campaign) stacks-block-height)
+      (- (get end-block campaign) stacks-block-height)
+      u0
+    )
+    u0
+  )
+)
+
+(define-read-only (get-treasury)
+  (var-get treasury)
+)
+
+(define-read-only (get-campaign-nonce)
+  (var-get campaign-nonce)
+)
