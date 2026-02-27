@@ -755,3 +755,183 @@
     )
   )
 )
+
+;; Complete milestone (for milestone-based voting - simplified version)
+(define-public (complete-milestone (campaign-id uint) (milestone-id uint))
+  (match (map-get? campaigns campaign-id)
+    campaign
+    (match (map-get? milestones { campaign-id: campaign-id, milestone-id: milestone-id })
+      milestone
+      (begin
+        (asserts! (is-eq (get owner campaign) tx-sender) err-not-campaign-owner)
+        (asserts! (not (get completed milestone)) err-milestone-already-completed)
+        
+        ;; Mark milestone as completed
+        (map-set milestones { campaign-id: campaign-id, milestone-id: milestone-id }
+          (merge milestone { completed: true })
+        )
+        
+        ;; Update campaign milestones completed count
+        (map-set campaigns campaign-id
+          (merge campaign { milestones-completed: (+ (get milestones-completed campaign) u1) })
+        )
+        
+        (print {
+          event: "milestone-completed",
+          campaign-id: campaign-id,
+          milestone-id: milestone-id
+        })
+        
+        (ok { campaign-id: campaign-id, milestone-id: milestone-id })
+      )
+      err-milestone-not-found
+    )
+    err-campaign-not-found
+  )
+)
+
+;; Enable refunds for failed campaign (owner only)
+(define-public (enable-refunds (campaign-id uint))
+  (match (map-get? campaigns campaign-id)
+    campaign
+    (begin
+      (asserts! (is-eq (get owner campaign) tx-sender) err-not-campaign-owner)
+      (asserts! (> stacks-block-height (get end-block campaign)) err-campaign-active)
+      (asserts! (< (get raised campaign) (get goal campaign)) err-goal-not-reached)
+      (asserts! (not (get claimed campaign)) err-already-claimed)
+      (asserts! (not (get refunds-enabled campaign)) err-already-claimed)
+      
+      (map-set campaigns campaign-id 
+        (merge campaign { refunds-enabled: true })
+      )
+      
+      (print {
+        event: "refunds-enabled",
+        campaign-id: campaign-id
+      })
+      
+      (ok { campaign-id: campaign-id, refunds-enabled: true })
+    )
+    err-campaign-not-found
+  )
+)
+
+;; Claim refund for failed campaign (contributor only)
+(define-public (claim-refund (campaign-id uint) (sbtc-contract <sip-010-trait>))
+  (let
+    (
+      (refund-recipient tx-sender)
+    )
+    (match (map-get? campaigns campaign-id)
+      campaign
+      (let
+        (
+          (contribution (get-contribution campaign-id refund-recipient))
+        )
+        (asserts! (> contribution u0) err-no-contribution)
+        (asserts! (> stacks-block-height (get end-block campaign)) err-campaign-active)
+        (asserts! (< (get raised campaign) (get goal campaign)) err-goal-not-reached)
+        (asserts! (get refunds-enabled campaign) err-refunds-not-enabled)
+        
+        ;; Clear contribution first (prevent reentrancy)
+        (map-set contributions { campaign-id: campaign-id, contributor: refund-recipient } u0)
+        
+        ;; Update campaign raised amount
+        (map-set campaigns campaign-id 
+          (merge campaign {
+            raised: (- (get raised campaign) contribution)
+          })
+        )
+        
+        ;; Transfer refund - contract sends back to contributor
+        (try! (as-contract? ((with-all-assets-unsafe))
+          (try! (contract-call? sbtc-contract transfer contribution tx-sender refund-recipient none))))
+        
+        ;; Update backer stats
+        (let ((stats (get-backer-stats refund-recipient)))
+          (map-set backer-stats refund-recipient 
+            (merge stats {
+              refunds-received: (+ (get refunds-received stats) u1)
+            })
+          )
+        )
+        
+        (print {
+          event: "refund-claimed",
+          campaign-id: campaign-id,
+          contributor: refund-recipient,
+          amount: contribution
+        })
+        
+        (ok { campaign-id: campaign-id, refunded: contribution })
+      )
+      err-campaign-not-found
+    )
+  )
+)
+
+;; Claim STX refund for failed campaign (contributor only)
+(define-public (claim-refund-stx (campaign-id uint))
+  (let
+    (
+      (refund-recipient tx-sender)
+    )
+    (match (map-get? campaigns campaign-id)
+      campaign
+      (let
+        (
+          (stx-contribution (get-stx-contribution campaign-id refund-recipient))
+        )
+        (asserts! (> stx-contribution u0) err-no-contribution)
+        (asserts! (> stacks-block-height (get end-block campaign)) err-campaign-active)
+        (asserts! (get refunds-enabled campaign) err-refunds-not-enabled)
+        
+        ;; Clear STX contribution first (prevent reentrancy)
+        (map-set stx-contributions { campaign-id: campaign-id, contributor: refund-recipient } u0)
+        
+        ;; Update campaign STX raised amount
+        (map-set campaigns campaign-id 
+          (merge campaign {
+            stx-raised: (- (get stx-raised campaign) stx-contribution)
+          })
+        )
+        
+        ;; Transfer STX refund - contract sends back to contributor
+        (try! (as-contract? ((with-stx stx-contribution))
+          (try! (stx-transfer? stx-contribution tx-sender refund-recipient))))
+        
+        ;; Update backer stats
+        (let ((stats (get-backer-stats refund-recipient)))
+          (map-set backer-stats refund-recipient 
+            (merge stats {
+              refunds-received: (+ (get refunds-received stats) u1)
+            })
+          )
+        )
+        
+        (print {
+          event: "stx-refund-claimed",
+          campaign-id: campaign-id,
+          contributor: refund-recipient,
+          amount: stx-contribution
+        })
+        
+        (ok { campaign-id: campaign-id, refunded: stx-contribution })
+      )
+      err-campaign-not-found
+    )
+  )
+)
+
+;; ========================================
+;; Admin Functions
+;; ========================================
+
+;; Update treasury address (owner only)
+(define-public (set-treasury (new-treasury principal))
+  (begin
+    (asserts! (is-eq tx-sender contract-owner) err-owner-only)
+    (var-set treasury new-treasury)
+    (ok true)
+  )
+)
