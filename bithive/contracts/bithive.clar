@@ -35,3 +35,43 @@
 (define-constant err-refunds-not-enabled (err u115))
 (define-constant err-not-initialized (err u116))
 (define-constant err-already-initialized (err u117))
+
+;; Platform fee: 2% (200 basis points)
+(define-constant platform-fee-bps u200)
+(define-constant bps-denominator u10000)
+
+;; ========================================
+;; Data Variables
+;; ========================================
+
+(define-data-var campaign-nonce uint u0)
+(define-data-var total-raised uint u0)
+(define-data-var total-campaigns uint u0)
+(define-data-var successful-campaigns uint u0)
+(define-data-var treasury principal contract-owner)
+(define-data-var contract-address (optional principal) none)
+(define-data-var is-initialized bool false)
+
+;; ========================================
+;; Data Maps
+;; ========================================
+
+;; Campaign storage
+(define-map campaigns uint
+  {
+    owner: principal,
+    title: (string-utf8 128),
+    description: (string-utf8 1024),
+    goal: uint,
+    raised: uint,                  ;; sBTC raised
+    stx-raised: uint,              ;; STX raised
+    contributors-count: uint,
+    start-block: uint,
+    end-block: uint,
+    claimed: bool,
+    stx-claimed: bool,             ;; Track STX claims separately
+    refunds-enabled: bool,
+    milestones-count: uint,
+    milestones-completed: uint
+  }
+)
