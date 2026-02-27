@@ -634,3 +634,67 @@
     )
   )
 )
+
+;; Claim STX funds for successful campaign (owner only)
+(define-public (claim-funds-stx (campaign-id uint))
+  (let
+    (
+      (caller tx-sender)
+    )
+    (match (map-get? campaigns campaign-id)
+      campaign
+      (let
+        (
+          (stx-raised (get stx-raised campaign))
+          (fee (calculate-fee stx-raised))
+          (owner-amount (- stx-raised fee))
+          (campaign-owner (get owner campaign))
+          (current-treasury (var-get treasury))
+        )
+        (asserts! (is-eq campaign-owner caller) err-not-campaign-owner)
+        (asserts! (> stacks-block-height (get end-block campaign)) err-campaign-active)
+        (asserts! (> stx-raised u0) err-no-contribution)
+        (asserts! (not (get stx-claimed campaign)) err-already-claimed)
+        
+        ;; Mark STX as claimed first (prevent reentrancy)
+        (map-set campaigns campaign-id 
+          (merge campaign { stx-claimed: true })
+        )
+        
+        ;; Transfer STX funds to owner (minus fee)
+        (try! (as-contract? ((with-stx owner-amount))
+          (try! (stx-transfer? owner-amount tx-sender campaign-owner))))
+        
+        ;; Transfer fee to treasury
+        (if (> fee u0)
+          (try! (as-contract? ((with-stx fee))
+            (try! (stx-transfer? fee tx-sender current-treasury))))
+          true
+        )
+        
+        ;; Update global stats
+        (var-set total-raised (+ (var-get total-raised) stx-raised))
+        
+        ;; Update creator stats
+        (let ((stats (get-creator-stats caller)))
+          (map-set creator-stats caller 
+            (merge stats {
+              total-raised: (+ (get total-raised stats) stx-raised)
+            })
+          )
+        )
+        
+        (print {
+          event: "stx-funds-claimed",
+          campaign-id: campaign-id,
+          owner: caller,
+          amount: owner-amount,
+          fee: fee
+        })
+        
+        (ok { campaign-id: campaign-id, claimed: owner-amount, fee: fee })
+      )
+      err-campaign-not-found
+    )
+  )
+)
