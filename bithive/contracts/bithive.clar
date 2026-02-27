@@ -250,3 +250,61 @@
 (define-read-only (get-campaign-nonce)
   (var-get campaign-nonce)
 )
+
+;; ========================================
+;; Public Functions - Campaign Management
+;; ========================================
+
+;; Create a new crowdfunding campaign
+(define-public (create-campaign 
+    (title (string-utf8 128)) 
+    (description (string-utf8 1024)) 
+    (goal uint) 
+    (duration uint))
+  (let
+    (
+      (campaign-id (var-get campaign-nonce))
+    )
+    (asserts! (> goal u0) err-invalid-amount)
+    (asserts! (> duration u0) err-invalid-amount)
+    
+    ;; Create campaign
+    (map-set campaigns campaign-id {
+      owner: tx-sender,
+      title: title,
+      description: description,
+      goal: goal,
+      raised: u0,
+      stx-raised: u0,
+      contributors-count: u0,
+      start-block: stacks-block-height,
+      end-block: (+ stacks-block-height duration),
+      claimed: false,
+      stx-claimed: false,
+      refunds-enabled: false,
+      milestones-count: u0,
+      milestones-completed: u0
+    })
+    
+    ;; Update global stats
+    (var-set campaign-nonce (+ campaign-id u1))
+    (var-set total-campaigns (+ (var-get total-campaigns) u1))
+    
+    ;; Update creator stats
+    (let ((stats (get-creator-stats tx-sender)))
+      (map-set creator-stats tx-sender 
+        (merge stats { campaigns-created: (+ (get campaigns-created stats) u1) })
+      )
+    )
+    
+    (print { 
+      event: "campaign-created", 
+      campaign-id: campaign-id, 
+      owner: tx-sender,
+      goal: goal,
+      end-block: (+ stacks-block-height duration)
+    })
+    
+    (ok { campaign-id: campaign-id, end-block: (+ stacks-block-height duration) })
+  )
+)
