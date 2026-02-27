@@ -108,3 +108,46 @@
     total-raised: uint
   }
 )
+
+;; Backer stats for reputation
+(define-map backer-stats principal
+  {
+    campaigns-backed: uint,
+    total-contributed: uint,
+    refunds-received: uint
+  }
+)
+
+;; ========================================
+;; Private Helper Functions
+;; ========================================
+
+;; Get the stored contract address (must be initialized first)
+(define-private (get-escrow-address)
+  (unwrap-panic (var-get contract-address))
+)
+
+;; Transfer sBTC from sender to recipient
+(define-private (transfer-sbtc 
+    (token-contract <sip-010-trait>)
+    (amount uint)
+    (sender principal)
+    (recipient principal))
+  (contract-call? token-contract transfer amount sender recipient none)
+)
+
+;; ========================================
+;; Initialization
+;; ========================================
+
+;; Initialize the contract - must be called once after deployment
+;; This stores the contract's principal for escrow operations
+(define-public (initialize)
+  (begin
+    (asserts! (is-eq tx-sender contract-owner) err-owner-only)
+    (asserts! (not (var-get is-initialized)) err-already-initialized)
+    (var-set contract-address (some current-contract))
+    (var-set is-initialized true)
+    (ok true)
+  )
+)
