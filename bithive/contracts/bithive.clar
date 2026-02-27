@@ -401,3 +401,94 @@
     err-campaign-not-found
   )
 )
+
+;; Update campaign description (owner only)
+(define-public (update-description (campaign-id uint) (new-description (string-utf8 1024)))
+  (match (map-get? campaigns campaign-id)
+    campaign
+    (begin
+      (asserts! (is-eq (get owner campaign) tx-sender) err-not-campaign-owner)
+      
+      (map-set campaigns campaign-id 
+        (merge campaign { description: new-description })
+      )
+      
+      (ok true)
+    )
+    err-campaign-not-found
+  )
+)
+
+;; ========================================
+;; Public Functions - Contributions
+;; ========================================
+
+;; Contribute sBTC to a campaign
+(define-public (contribute (campaign-id uint) (amount uint) (sbtc-contract <sip-010-trait>))
+  (let
+    (
+      (contributor tx-sender)
+      (escrow-addr (get-escrow-address))
+    )
+    (asserts! (var-get is-initialized) err-not-initialized)
+    (match (map-get? campaigns campaign-id)
+      campaign
+      (let
+        (
+          (current-contribution (get-contribution campaign-id contributor))
+          (is-new-contributor (is-eq current-contribution u0))
+        )
+        (asserts! (> amount u0) err-invalid-amount)
+        (asserts! (<= stacks-block-height (get end-block campaign)) err-campaign-ended)
+        (asserts! (not (get claimed campaign)) err-already-claimed)
+        (asserts! (not (get refunds-enabled campaign)) err-campaign-failed)
+        
+        ;; Transfer sBTC from contributor to contract (escrow)
+        (try! (transfer-sbtc sbtc-contract amount contributor escrow-addr))
+        
+        ;; Update campaign
+        (map-set campaigns campaign-id 
+          (merge campaign {
+            raised: (+ (get raised campaign) amount),
+            contributors-count: (if is-new-contributor 
+                                  (+ (get contributors-count campaign) u1)
+                                  (get contributors-count campaign))
+          })
+        )
+        
+        ;; Update contribution record
+        (map-set contributions { campaign-id: campaign-id, contributor: contributor }
+          (+ current-contribution amount)
+        )
+        
+        ;; Update backer stats
+        (let ((stats (get-backer-stats contributor)))
+          (map-set backer-stats contributor 
+            (merge stats {
+              campaigns-backed: (if is-new-contributor 
+                                  (+ (get campaigns-backed stats) u1)
+                                  (get campaigns-backed stats)),
+              total-contributed: (+ (get total-contributed stats) amount)
+            })
+          )
+        )
+        
+        (print {
+          event: "contribution",
+          campaign-id: campaign-id,
+          contributor: contributor,
+          amount: amount,
+          total-raised: (+ (get raised campaign) amount)
+        })
+        
+        (ok { 
+          campaign-id: campaign-id, 
+          contributed: amount, 
+          total-contribution: (+ current-contribution amount),
+          campaign-raised: (+ (get raised campaign) amount)
+        })
+      )
+      err-campaign-not-found
+    )
+  )
+)
