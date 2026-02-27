@@ -151,3 +151,34 @@
     (ok true)
   )
 )
+
+;; ========================================
+;; Read-Only Functions
+;; ========================================
+
+(define-read-only (get-campaign (campaign-id uint))
+  (map-get? campaigns campaign-id)
+)
+
+(define-read-only (get-contribution (campaign-id uint) (contributor principal))
+  (default-to u0 
+    (map-get? contributions { campaign-id: campaign-id, contributor: contributor })
+  )
+)
+
+(define-read-only (get-stx-contribution (campaign-id uint) (contributor principal))
+  (default-to u0
+    (map-get? stx-contributions { campaign-id: campaign-id, contributor: contributor })
+  )
+)
+
+(define-read-only (get-milestone (campaign-id uint) (milestone-id uint))
+  (map-get? milestones { campaign-id: campaign-id, milestone-id: milestone-id })
+)
+
+(define-read-only (get-creator-stats (creator principal))
+  (default-to 
+    { campaigns-created: u0, campaigns-successful: u0, total-raised: u0 }
+    (map-get? creator-stats creator)
+  )
+)
