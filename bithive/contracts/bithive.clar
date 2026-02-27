@@ -492,3 +492,75 @@
     )
   )
 )
+
+;; Contribute STX to a campaign (no SIP-010 token needed)
+(define-public (contribute-stx (campaign-id uint) (amount uint))
+  (let
+    (
+      (contributor tx-sender)
+      (escrow-addr (get-escrow-address))
+    )
+    (asserts! (var-get is-initialized) err-not-initialized)
+    (match (map-get? campaigns campaign-id)
+      campaign
+      (let
+        (
+          (current-stx-contribution (get-stx-contribution campaign-id contributor))
+          (current-sbtc-contribution (get-contribution campaign-id contributor))
+          (is-new-contributor (and (is-eq current-stx-contribution u0) (is-eq current-sbtc-contribution u0)))
+        )
+        (asserts! (> amount u0) err-invalid-amount)
+        (asserts! (<= stacks-block-height (get end-block campaign)) err-campaign-ended)
+        (asserts! (not (get claimed campaign)) err-already-claimed)
+        (asserts! (not (get stx-claimed campaign)) err-already-claimed)
+        (asserts! (not (get refunds-enabled campaign)) err-campaign-failed)
+        
+        ;; Transfer STX from contributor to contract (escrow)
+        (try! (stx-transfer? amount contributor escrow-addr))
+        
+        ;; Update campaign
+        (map-set campaigns campaign-id 
+          (merge campaign {
+            stx-raised: (+ (get stx-raised campaign) amount),
+            contributors-count: (if is-new-contributor 
+                                  (+ (get contributors-count campaign) u1)
+                                  (get contributors-count campaign))
+          })
+        )
+        
+        ;; Update STX contribution record
+        (map-set stx-contributions { campaign-id: campaign-id, contributor: contributor }
+          (+ current-stx-contribution amount)
+        )
+        
+        ;; Update backer stats
+        (let ((stats (get-backer-stats contributor)))
+          (map-set backer-stats contributor 
+            (merge stats {
+              campaigns-backed: (if is-new-contributor 
+                                  (+ (get campaigns-backed stats) u1)
+                                  (get campaigns-backed stats)),
+              total-contributed: (+ (get total-contributed stats) amount)
+            })
+          )
+        )
+        
+        (print {
+          event: "stx-contribution",
+          campaign-id: campaign-id,
+          contributor: contributor,
+          amount: amount,
+          total-stx-raised: (+ (get stx-raised campaign) amount)
+        })
+        
+        (ok { 
+          campaign-id: campaign-id, 
+          contributed: amount, 
+          total-contribution: (+ current-stx-contribution amount),
+          campaign-stx-raised: (+ (get stx-raised campaign) amount)
+        })
+      )
+      err-campaign-not-found
+    )
+  )
+)
