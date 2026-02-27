@@ -182,3 +182,37 @@
     (map-get? creator-stats creator)
   )
 )
+
+(define-read-only (get-backer-stats (backer principal))
+  (default-to 
+    { campaigns-backed: u0, total-contributed: u0, refunds-received: u0 }
+    (map-get? backer-stats backer)
+  )
+)
+
+(define-read-only (get-platform-stats)
+  {
+    total-campaigns: (var-get total-campaigns),
+    successful-campaigns: (var-get successful-campaigns),
+    total-raised: (var-get total-raised)
+  }
+)
+
+(define-read-only (is-campaign-active (campaign-id uint))
+  (match (map-get? campaigns campaign-id)
+    campaign 
+    (and 
+      (<= stacks-block-height (get end-block campaign)) 
+      (not (get claimed campaign))
+      (not (get refunds-enabled campaign))
+    )
+    false
+  )
+)
+
+(define-read-only (is-campaign-successful (campaign-id uint))
+  (match (map-get? campaigns campaign-id)
+    campaign (>= (get raised campaign) (get goal campaign))
+    false
+  )
+)
