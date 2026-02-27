@@ -698,3 +698,60 @@
     )
   )
 )
+
+;; Claim milestone funds (owner only, for milestone-based campaigns)
+(define-public (claim-milestone (campaign-id uint) (milestone-id uint) (sbtc-contract <sip-010-trait>))
+  (let
+    (
+      (caller tx-sender)
+    )
+    (match (map-get? campaigns campaign-id)
+      campaign
+      (match (map-get? milestones { campaign-id: campaign-id, milestone-id: milestone-id })
+        milestone
+        (let
+          (
+            (amount (get amount milestone))
+            (fee (calculate-fee amount))
+            (owner-amount (- amount fee))
+            (campaign-owner (get owner campaign))
+            (current-treasury (var-get treasury))
+          )
+          (asserts! (is-eq campaign-owner caller) err-not-campaign-owner)
+          (asserts! (> stacks-block-height (get end-block campaign)) err-campaign-active)
+          (asserts! (>= (get raised campaign) (get goal campaign)) err-goal-not-reached)
+          (asserts! (get completed milestone) err-milestone-not-ready)
+          (asserts! (not (get claimed milestone)) err-milestone-already-completed)
+          
+          ;; Mark milestone as claimed first (prevent reentrancy)
+          (map-set milestones { campaign-id: campaign-id, milestone-id: milestone-id }
+            (merge milestone { claimed: true })
+          )
+          
+          ;; Transfer milestone funds - contract sends to owner
+          (try! (as-contract? ((with-all-assets-unsafe))
+            (try! (contract-call? sbtc-contract transfer owner-amount tx-sender campaign-owner none))))
+          
+          ;; Transfer fee to treasury
+          (if (> fee u0)
+            (try! (as-contract? ((with-all-assets-unsafe))
+              (try! (contract-call? sbtc-contract transfer fee tx-sender current-treasury none))))
+            true
+          )
+          
+          (print {
+            event: "milestone-claimed",
+            campaign-id: campaign-id,
+            milestone-id: milestone-id,
+            amount: owner-amount,
+            fee: fee
+          })
+          
+          (ok { campaign-id: campaign-id, milestone-id: milestone-id, claimed: owner-amount, fee: fee })
+        )
+        err-milestone-not-found
+      )
+      err-campaign-not-found
+    )
+  )
+)
