@@ -308,3 +308,51 @@
     (ok { campaign-id: campaign-id, end-block: (+ stacks-block-height duration) })
   )
 )
+
+;; Add milestone to campaign (owner only, before campaign ends)
+(define-public (add-milestone 
+    (campaign-id uint)
+    (title (string-utf8 128))
+    (description (string-utf8 512))
+    (amount uint))
+  (match (map-get? campaigns campaign-id)
+    campaign
+    (let
+      (
+        (milestone-id (get milestones-count campaign))
+        (current-milestone-total (get-milestone-total campaign-id (get milestones-count campaign)))
+      )
+      (asserts! (is-eq (get owner campaign) tx-sender) err-not-campaign-owner)
+      (asserts! (<= stacks-block-height (get end-block campaign)) err-campaign-ended)
+      (asserts! (> amount u0) err-invalid-amount)
+      ;; Milestone amounts should not exceed goal
+      (asserts! (<= (+ current-milestone-total amount) (get goal campaign)) err-invalid-milestone-amount)
+      
+      ;; Add milestone
+      (map-set milestones { campaign-id: campaign-id, milestone-id: milestone-id }
+        {
+          title: title,
+          description: description,
+          amount: amount,
+          completed: false,
+          claimed: false
+        }
+      )
+      
+      ;; Update campaign milestone count
+      (map-set campaigns campaign-id 
+        (merge campaign { milestones-count: (+ milestone-id u1) })
+      )
+      
+      (print {
+        event: "milestone-added",
+        campaign-id: campaign-id,
+        milestone-id: milestone-id,
+        amount: amount
+      })
+      
+      (ok { campaign-id: campaign-id, milestone-id: milestone-id })
+    )
+    err-campaign-not-found
+  )
+)
