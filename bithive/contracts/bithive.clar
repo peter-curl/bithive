@@ -75,3 +75,36 @@
     milestones-completed: uint
   }
 )
+
+;; Contributions per campaign per user (sBTC)
+(define-map contributions 
+  { campaign-id: uint, contributor: principal } 
+  uint
+)
+
+;; STX contributions per campaign per user
+(define-map stx-contributions
+  { campaign-id: uint, contributor: principal }
+  uint
+)
+
+;; Campaign milestones
+(define-map milestones 
+  { campaign-id: uint, milestone-id: uint }
+  {
+    title: (string-utf8 128),
+    description: (string-utf8 512),
+    amount: uint,
+    completed: bool,
+    claimed: bool
+  }
+)
+
+;; Creator stats for reputation
+(define-map creator-stats principal
+  {
+    campaigns-created: uint,
+    campaigns-successful: uint,
+    total-raised: uint
+  }
+)
