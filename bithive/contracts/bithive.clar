@@ -356,3 +356,48 @@
     err-campaign-not-found
   )
 )
+
+;; Helper to calculate total milestone amounts
+(define-private (get-milestone-total (campaign-id uint) (count uint))
+  (fold + (map get-milestone-amount-or-zero 
+    (list 
+      { campaign-id: campaign-id, milestone-id: u0 }
+      { campaign-id: campaign-id, milestone-id: u1 }
+      { campaign-id: campaign-id, milestone-id: u2 }
+      { campaign-id: campaign-id, milestone-id: u3 }
+      { campaign-id: campaign-id, milestone-id: u4 }
+    )
+  ) u0)
+)
+
+(define-private (get-milestone-amount-or-zero (key { campaign-id: uint, milestone-id: uint }))
+  (match (map-get? milestones key)
+    milestone (get amount milestone)
+    u0
+  )
+)
+
+;; Extend campaign deadline (owner only, while active)
+(define-public (extend-deadline (campaign-id uint) (additional-blocks uint))
+  (match (map-get? campaigns campaign-id)
+    campaign
+    (begin
+      (asserts! (is-eq (get owner campaign) tx-sender) err-not-campaign-owner)
+      (asserts! (<= stacks-block-height (get end-block campaign)) err-campaign-ended)
+      (asserts! (> additional-blocks u0) err-invalid-amount)
+      
+      (map-set campaigns campaign-id 
+        (merge campaign { end-block: (+ (get end-block campaign) additional-blocks) })
+      )
+      
+      (print {
+        event: "deadline-extended",
+        campaign-id: campaign-id,
+        new-end-block: (+ (get end-block campaign) additional-blocks)
+      })
+      
+      (ok { campaign-id: campaign-id, new-end-block: (+ (get end-block campaign) additional-blocks) })
+    )
+    err-campaign-not-found
+  )
+)
