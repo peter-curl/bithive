@@ -1,0 +1,22 @@
+{
+  "name": "BitHive",
+  "short_name": "BitHive",
+  "description": "Fund the Future with Bitcoin - A premium sBTC crowdfunding platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#f5a623",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
