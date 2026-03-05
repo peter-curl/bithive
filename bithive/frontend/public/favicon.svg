@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a"/>
+      <stop offset="100%" style="stop-color:#0d0d0d"/>
+    </linearGradient>
+    <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f5a623"/>
+      <stop offset="50%" style="stop-color:#e8930c"/>
+      <stop offset="100%" style="stop-color:#d4820a"/>
+    </linearGradient>
+    <linearGradient id="innerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffcc4d"/>
+      <stop offset="100%" style="stop-color:#f5a623"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="250" fill="url(#bgGrad)"/>
+  <circle cx="256" cy="256" r="250" fill="none" stroke="#f5a623" stroke-width="4" opacity="0.3"/>
+  
+  <!-- Main hexagon (honeycomb cell) -->
+  <g filter="url(#glow)">
+    <polygon 
+      points="256,56 396,130 396,278 256,352 116,278 116,130" 
+      fill="url(#hexGrad)"
+      stroke="#ffcc4d"
+      stroke-width="3"
+    />
+  </g>
+  
+  <!-- Inner hexagon pattern -->
+  <polygon 
+    points="256,96 356,150 356,258 256,312 156,258 156,150" 
+    fill="none"
+    stroke="url(#innerGrad)"
+    stroke-width="4"
+    opacity="0.6"
+  />
+  
+  <!-- Center Bitcoin "B" stylized -->
+  <g transform="translate(256, 204)">
+    <text 
+      x="0" 
+      y="0" 
+      text-anchor="middle" 
+      dominant-baseline="middle"
+      font-family="Arial Black, Arial, sans-serif" 
+      font-size="120" 
+      font-weight="900"
+      fill="#1a1a1a"
+    >₿</text>
+  </g>
+  
+  <!-- Small honeycomb cells around -->
+  <g opacity="0.4">
+    <!-- Top left -->
+    <polygon points="90,80 130,60 170,80 170,120 130,140 90,120" fill="none" stroke="#f5a623" stroke-width="2"/>
+    <!-- Top right -->
+    <polygon points="342,80 382,60 422,80 422,120 382,140 342,120" fill="none" stroke="#f5a623" stroke-width="2"/>
+    <!-- Bottom left -->
+    <polygon points="90,320 130,300 170,320 170,360 130,380 90,360" fill="none" stroke="#f5a623" stroke-width="2"/>
+    <!-- Bottom right -->
+    <polygon points="342,320 382,300 422,320 422,360 382,380 342,360" fill="none" stroke="#f5a623" stroke-width="2"/>
+    <!-- Bottom center -->
+    <polygon points="216,380 256,360 296,380 296,420 256,440 216,420" fill="none" stroke="#f5a623" stroke-width="2"/>
+  </g>
+</svg>
