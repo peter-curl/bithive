@@ -3,6 +3,8 @@
  * 
  * Uses @stacks/connect for wallet authentication on testnet.
  * Supports Leather and Xverse wallets via SIP-030 standard.
+ * 
+ * TESTNET ONLY: This app only accepts testnet wallets (addresses starting with "ST")
  */
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { 
@@ -14,6 +16,17 @@ import {
 import type { AddressInfo } from "@stacks/connect";
 import { toast } from "sonner";
 import { STACKS_API_URL, CONTRACTS } from "@/lib/contracts";
+
+// ===========================================
+// Constants
+// ===========================================
+
+/**
+ * Check if an address is a testnet address (starts with "ST")
+ */
+function isTestnetAddress(address: string): boolean {
+  return address.startsWith("ST");
+}
 
 // ===========================================
 // Types
@@ -128,6 +141,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       if (!stxAddress) {
         throw new Error("No STX address found in wallet response");
       }
+
+      // TESTNET VALIDATION: Only allow testnet addresses
+      if (!isTestnetAddress(stxAddress.address)) {
+        stacksDisconnect();
+        toast.error("Mainnet wallet detected", {
+          description: (
+            <div className="space-y-2">
+              <p>BitHive is currently running on <strong>Stacks Testnet</strong>.</p>
+              <p className="text-xs text-muted-foreground">
+                Please switch to a testnet wallet (addresses start with "ST") to continue.
+              </p>
+            </div>
+          ),
+          duration: 8000,
+        });
+        throw new Error("Please connect a testnet wallet. BitHive is running on Stacks Testnet.");
+      }
       
       // Fetch balances for the connected address
       const { stx, sbtc } = await fetchBalances(stxAddress.address);
@@ -176,6 +206,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           );
           
           if (stxAddress) {
+            // Validate testnet address for existing connections too
+            if (!isTestnetAddress(stxAddress.address)) {
+              stacksDisconnect();
+              console.log("Disconnected mainnet wallet - testnet only");
+              return;
+            }
+
             const { stx, sbtc } = await fetchBalances(stxAddress.address);
             setWallet({
               connected: true,

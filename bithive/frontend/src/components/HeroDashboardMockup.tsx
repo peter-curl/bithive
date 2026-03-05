@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLiveStats } from "@/hooks/usePlatformStats";
 
 const DATA_SETS = [
   [
@@ -27,13 +28,6 @@ const GRADIENT_COLORS = [
   { start: "hsl(38, 96%, 52%)", end: "hsl(43, 96%, 56%)" },
   { start: "hsl(33, 96%, 50%)", end: "hsl(38, 96%, 52%)" },
   { start: "hsl(38, 96%, 52%)", end: "hsl(43, 96%, 56%)" },
-];
-
-const STAT_SETS = [
-  { raised: 12.4, campaigns: 24, backers: 156 },
-  { raised: 13.1, campaigns: 26, backers: 163 },
-  { raised: 14.2, campaigns: 27, backers: 171 },
-  { raised: 13.6, campaigns: 25, backers: 168 },
 ];
 
 function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: number }) {
@@ -106,7 +100,14 @@ export function HeroDashboardMockup() {
   }, [rotateXMotion, rotateYMotion]);
 
   const colors = GRADIENT_COLORS[index];
-  const stats = STAT_SETS[index];
+  
+  // Use real stats from contract
+  const liveStats = useLiveStats();
+  const stats = {
+    raised: liveStats.raised || 0,
+    campaigns: liveStats.campaigns || 0,
+    backers: liveStats.backers || 0,
+  };
 
   return (
     <div

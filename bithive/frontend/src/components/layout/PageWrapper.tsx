@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { MobileNav } from "./MobileNav";
+import { TestnetBanner } from "@/components/TestnetBanner";
 
 interface PageWrapperProps {
   children: ReactNode;
@@ -17,6 +18,7 @@ export function PageWrapper({ children }: PageWrapperProps) {
       >
         Skip to main content
       </a>
+      <TestnetBanner />
       <Header />
       <motion.main
         id="main-content"
