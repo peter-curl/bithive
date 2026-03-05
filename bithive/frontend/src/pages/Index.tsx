@@ -9,7 +9,7 @@ import { HeroDashboardMockup } from "@/components/HeroDashboardMockup";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { PLATFORM_STATS } from "@/lib/mock-data";
+import { usePlatformStats } from "@/hooks/usePlatformStats";
 
 function CountUp({ end, suffix = "", prefix = "", decimals = 0 }: { end: number; suffix?: string; prefix?: string; decimals?: number }) {
   const [count, setCount] = useState(0);
@@ -219,6 +219,50 @@ function HowItWorksSection() {
   );
 }
 
+/**
+ * Platform Stats Section - Shows real-time stats from the contract
+ */
+function PlatformStatsSection() {
+  const { totalRaised, totalCampaigns, successRate, isLoading } = usePlatformStats();
+
+  const stats = [
+    { label: "Total Raised", value: totalRaised, suffix: " sBTC", decimals: 1 },
+    { label: "Campaigns Funded", value: totalCampaigns, suffix: "", decimals: 0 },
+    { label: "Success Rate", value: successRate, suffix: "%", decimals: 0 },
+  ];
+
+  return (
+    <section aria-label="Platform statistics" className="border-y border-border/50 bg-card/30 py-10">
+      <div className="container">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {stats.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.15 }}
+            >
+              <Card className="border-border/50 bg-gradient-card text-center transition-colors duration-300 hover:border-primary/30 hover:shadow-[0_8px_30px_hsl(43_96%_56%/0.15)]">
+                <CardContent className="p-6">
+                  <div className="text-3xl font-bold text-primary md:text-4xl">
+                    {isLoading ? (
+                      <span className="inline-block h-10 w-20 animate-pulse rounded bg-primary/20" />
+                    ) : (
+                      <CountUp end={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const Index = () => {
   usePageTitle("");
   const { featuredCampaigns } = useCampaigns();
@@ -282,34 +326,7 @@ const Index = () => {
       </section>
 
       {/* Platform Stats */}
-      <section aria-label="Platform statistics" className="border-y border-border/50 bg-card/30 py-10">
-        <div className="container">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {[
-              { label: "Total Raised", value: PLATFORM_STATS.totalRaised, suffix: " sBTC", prefix: "", decimals: 1 },
-              { label: "Campaigns Funded", value: PLATFORM_STATS.totalCampaigns, suffix: "", prefix: "" },
-              { label: "Success Rate", value: PLATFORM_STATS.successRate, suffix: "%", prefix: "" },
-            ].map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15 }}
-              >
-                <Card className="border-border/50 bg-gradient-card text-center transition-colors duration-300 hover:border-primary/30 hover:shadow-[0_8px_30px_hsl(43_96%_56%/0.15)]">
-                  <CardContent className="p-6">
-                    <div className="text-3xl font-bold text-primary md:text-4xl">
-                      <CountUp end={stat.value} suffix={stat.suffix} prefix={stat.prefix} decimals={(stat as any).decimals || 0} />
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PlatformStatsSection />
 
       {/* Featured Campaigns */}
       <section aria-label="Featured campaigns" className="py-14 md:py-16">
