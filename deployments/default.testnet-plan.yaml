@@ -1,0 +1,45 @@
+---
+id: 0
+name: Testnet deployment
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - requirement-publish:
+            contract-id: ST1F7QA2MDF17S807EPA36TSS8AMEFY4KA9TVGWXT.sbtc-registry
+            remap-sender: ST3X2FX5PMJZVRSXXQMVGAX7AC2H75JPVD0ERM2SW
+            remap-principals:
+              ST1F7QA2MDF17S807EPA36TSS8AMEFY4KA9TVGWXT: ST3X2FX5PMJZVRSXXQMVGAX7AC2H75JPVD0ERM2SW
+            cost: 112090
+            path: "./.cache/requirements/ST1F7QA2MDF17S807EPA36TSS8AMEFY4KA9TVGWXT.sbtc-registry.clar"
+            clarity-version: 3
+        - requirement-publish:
+            contract-id: ST1F7QA2MDF17S807EPA36TSS8AMEFY4KA9TVGWXT.sbtc-token
+            remap-sender: ST3X2FX5PMJZVRSXXQMVGAX7AC2H75JPVD0ERM2SW
+            remap-principals:
+              ST1F7QA2MDF17S807EPA36TSS8AMEFY4KA9TVGWXT: ST3X2FX5PMJZVRSXXQMVGAX7AC2H75JPVD0ERM2SW
+            cost: 47600
+            path: "./.cache/requirements/ST1F7QA2MDF17S807EPA36TSS8AMEFY4KA9TVGWXT.sbtc-token.clar"
+            clarity-version: 3
+        - requirement-publish:
+            contract-id: ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.sip-010-trait-ft-standard
+            remap-sender: ST3X2FX5PMJZVRSXXQMVGAX7AC2H75JPVD0ERM2SW
+            remap-principals:
+              ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT: ST3X2FX5PMJZVRSXXQMVGAX7AC2H75JPVD0ERM2SW
+            cost: 8390
+            path: "./.cache/requirements/ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.sip-010-trait-ft-standard.clar"
+            clarity-version: 3
+      epoch: "3.1"
+    - id: 1
+      transactions:
+        - contract-publish:
+            contract-name: bithive-v2
+            expected-sender: ST3X2FX5PMJZVRSXXQMVGAX7AC2H75JPVD0ERM2SW
+            cost: 2438335
+            path: contracts/bithive.clar
+            anchor-block-only: true
+            clarity-version: 4
+      epoch: "3.3"
