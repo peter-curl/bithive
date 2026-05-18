@@ -60,3 +60,4 @@
 
 ;; Accrual registry
 (define-map accruals
+    { accrual-id: uint }
