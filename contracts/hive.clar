@@ -132,3 +132,4 @@
 
             ;; Sender stats
             (sender-total
+                (default-to u0
