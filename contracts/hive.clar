@@ -93,3 +93,5 @@
 ;; calculate-fee
 ;; Calculates the protocol fee
 (define-private (calculate-fee (amount uint))
+    (/ (* amount fee-basis-points) basis-points-divisor)
+)
