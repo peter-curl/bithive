@@ -85,3 +85,11 @@
 
 ;; Total amount a user has received
 (define-map user-total-received principal uint)
+
+;; ---------------------------------------------------------
+;; Private Functions
+;; ---------------------------------------------------------
+
+;; calculate-fee
+;; Calculates the protocol fee
+(define-private (calculate-fee (amount uint))
