@@ -66,3 +66,6 @@
         recipient: principal,
         amount: uint,
         message: (string-utf8 280),
+        accrual-height: uint
+    }
+)
