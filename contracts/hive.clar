@@ -138,3 +138,4 @@
             )
 
             (sender-count
+                (default-to u0
