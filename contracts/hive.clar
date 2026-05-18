@@ -126,3 +126,4 @@
     (let
         (
             (accrual-id (var-get total-accruals))
+            (fee (calculate-fee amount))
