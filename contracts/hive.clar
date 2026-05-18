@@ -139,3 +139,6 @@
 
             (sender-count
                 (default-to u0
+                    (map-get? user-accrual-count tx-sender)
+                )
+            )
