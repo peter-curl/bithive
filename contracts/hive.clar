@@ -95,3 +95,27 @@
 (define-private (calculate-fee (amount uint))
     (/ (* amount fee-basis-points) basis-points-divisor)
 )
+
+;; ---------------------------------------------------------
+;; Public Functions
+;; ---------------------------------------------------------
+
+;; hive
+;;
+;; Core protocol function.
+;;
+;; Allows a user to accrue STX rewards to another user
+;; with an optional message.
+;;
+;; Process:
+;; 1. Validate parameters
+;; 2. Calculate protocol fee
+;; 3. Transfer net amount to recipient
+;; 4. Transfer fee to protocol owner
+;; 5. Record accrual
+;; 6. Update user statistics
+;; 7. Update protocol statistics
+;;
+;; The protocol owner does not pay fees.
+
+(define-public (hive-reward
