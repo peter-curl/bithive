@@ -25,3 +25,6 @@
 
 ;; The principal that deploys the contract becomes the protocol owner
 (define-constant contract-owner tx-sender)
+
+;; Error codes
+(define-constant err-owner-only (err u100))
