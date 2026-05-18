@@ -64,3 +64,4 @@
     {
         sender: principal,
         recipient: principal,
+        amount: uint,
