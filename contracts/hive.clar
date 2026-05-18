@@ -136,3 +136,5 @@
                     (map-get? user-total-accrued tx-sender)
                 )
             )
+
+            (sender-count
