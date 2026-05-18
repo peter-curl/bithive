@@ -50,3 +50,6 @@
 
 ;; Total volume processed through the protocol
 (define-data-var total-volume uint u0)
+
+;; Total fees accumulated by the protocol
+(define-data-var protocol-revenue uint u0)
