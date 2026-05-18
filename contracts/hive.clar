@@ -133,3 +133,6 @@
             ;; Sender stats
             (sender-total
                 (default-to u0
+                    (map-get? user-total-accrued tx-sender)
+                )
+            )
