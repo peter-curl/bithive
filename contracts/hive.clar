@@ -124,3 +124,5 @@
     (message (string-utf8 280))
 )
     (let
+        (
+            (accrual-id (var-get total-accruals))
