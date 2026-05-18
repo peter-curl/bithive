@@ -47,3 +47,6 @@
 
 ;; Total number of accruals
 (define-data-var total-accruals uint u0)
+
+;; Total volume processed through the protocol
+(define-data-var total-volume uint u0)
