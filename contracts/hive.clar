@@ -39,3 +39,4 @@
 
 ;; 50 basis points = 0.5%
 (define-constant fee-basis-points u50)
+(define-constant basis-points-divisor u10000)
