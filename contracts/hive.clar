@@ -69,3 +69,10 @@
         accrual-height: uint
     }
 )
+
+;; ---------------------------------------------------------
+;; User Activity Tracking
+;; ---------------------------------------------------------
+
+;; Number of accruals a user has sent
+(define-map user-accrual-count principal uint)
