@@ -53,3 +53,10 @@
 
 ;; Total fees accumulated by the protocol
 (define-data-var protocol-revenue uint u0)
+
+;; ---------------------------------------------------------
+;; Data Maps
+;; ---------------------------------------------------------
+
+;; Accrual registry
+(define-map accruals
