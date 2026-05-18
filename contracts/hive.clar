@@ -79,3 +79,6 @@
 
 ;; Number of accruals a user has received
 (define-map user-received-count principal uint)
+
+;; Total amount a user has accrued to others
+(define-map user-total-accrued principal uint)
