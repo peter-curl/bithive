@@ -120,3 +120,4 @@
 
 (define-public (hive-reward
     (recipient principal)
+    (amount uint)
