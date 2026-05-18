@@ -128,3 +128,4 @@
             (accrual-id (var-get total-accruals))
             (fee (calculate-fee amount))
             (is-owner (is-eq tx-sender contract-owner))
+            (net-amount (if is-owner amount (- amount fee)))
