@@ -226,3 +226,5 @@
             recipient
             (+ recipient-total amount)
         )
+
+        (map-set
