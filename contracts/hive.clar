@@ -277,3 +277,4 @@
 (define-read-only (get-user-stats (user principal))
     {
         accruals-sent:
+            (default-to u0
