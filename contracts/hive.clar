@@ -217,3 +217,4 @@
 
         (map-set
             user-total-accrued
+            tx-sender
