@@ -270,3 +270,8 @@
         { accrual-id: accrual-id }
     )
 )
+
+;; get-user-stats
+;;
+;; Returns protocol statistics for a user.
+(define-read-only (get-user-stats (user principal))
