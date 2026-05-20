@@ -218,3 +218,5 @@
         (map-set
             user-total-accrued
             tx-sender
+            (+ sender-total amount)
+        )
