@@ -287,3 +287,4 @@
             ),
 
         total-accrued:
+            (default-to u0
