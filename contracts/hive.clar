@@ -149,3 +149,5 @@
                     (map-get? user-total-received recipient)
                 )
             )
+
+            (recipient-count
