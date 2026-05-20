@@ -222,3 +222,4 @@
         )
 
         (map-set
+            user-total-received
