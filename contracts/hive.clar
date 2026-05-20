@@ -248,3 +248,4 @@
         )
         
         (var-set
+            protocol-revenue
