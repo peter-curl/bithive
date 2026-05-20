@@ -227,6 +227,8 @@
             (+ recipient-total amount)
         )
 
-        (map-set
+         (map-set
             user-received-count
             recipient
+            (+ recipient-count u1)
+        )
