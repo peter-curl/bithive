@@ -267,3 +267,6 @@
 (define-read-only (get-accrual (accrual-id uint))
     (map-get?
         accruals
+        { accrual-id: accrual-id }
+    )
+)
