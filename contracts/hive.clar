@@ -157,7 +157,7 @@
             )
         )
 
-        ; -------------------------------------------------
+        ;; -------------------------------------------------
         ;; Validation
         ;; -------------------------------------------------
 
@@ -227,7 +227,13 @@
             (+ recipient-total amount)
         )
 
-         (map-set
+        (map-set
+            user-accrual-count
+            tx-sender
+            (+ sender-count u1)
+        )
+
+        (map-set
             user-received-count
             recipient
             (+ recipient-count u1)
@@ -246,7 +252,7 @@
             total-volume
             (+ (var-get total-volume) amount)
         )
-        
+
         (var-set
             protocol-revenue
             (+ (var-get protocol-revenue) fee)
@@ -315,6 +321,17 @@
 (define-read-only (get-user-total-accrued (user principal))
     (ok
         (default-to u0
+            (map-get? user-total-accrued user)
+        )
+    )
+)
+
+;; get-user-total-received
+;;
+;; Returns total received by a user.
+(define-read-only (get-user-total-received (user principal))
+    (ok
+        (default-to u0
             (map-get? user-total-received user)
         )
     )
@@ -324,3 +341,5 @@
 ;;
 ;; Returns fee amount for a transaction.
 (define-read-only (get-fee-for-amount (amount uint))
+    (ok (calculate-fee amount))
+)
