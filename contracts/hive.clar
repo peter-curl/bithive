@@ -256,3 +256,12 @@
         (ok accrual-id)
     )
 )
+
+;; ---------------------------------------------------------
+;; Read-Only Functions
+;; ---------------------------------------------------------
+
+;; get-accrual
+;;
+;; Retrieves details for a specific accrual.
+(define-read-only (get-accrual (accrual-id uint))
