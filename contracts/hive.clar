@@ -145,3 +145,4 @@
 
             ;; Recipient stats
             (recipient-total
+                (default-to u0
