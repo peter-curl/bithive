@@ -305,3 +305,6 @@
     {
         total-accruals: (var-get total-accruals),
         total-volume: (var-get total-volume),
+        protocol-revenue: (var-get protocol-revenue)
+    }
+)
