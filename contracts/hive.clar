@@ -169,3 +169,10 @@
             (not (is-eq tx-sender recipient))
             err-invalid-amount
         )
+
+        ;; -------------------------------------------------
+        ;; STX Transfers
+        ;; -------------------------------------------------
+
+        ;; Transfer net amount to recipient
+        (try!
