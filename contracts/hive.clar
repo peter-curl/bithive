@@ -308,3 +308,8 @@
         protocol-revenue: (var-get protocol-revenue)
     }
 )
+
+;; get-user-total-accrued
+;;
+;; Returns total accrued by a user.
+(define-read-only (get-user-total-accrued (user principal))
