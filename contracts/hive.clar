@@ -142,3 +142,6 @@
                     (map-get? user-accrual-count tx-sender)
                 )
             )
+
+            ;; Recipient stats
+            (recipient-total
