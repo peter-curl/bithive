@@ -243,4 +243,7 @@
         )
 
         (var-set
-            total-accruals
+            total-volume
+            (+ (var-get total-volume) amount)
+        )
+            
