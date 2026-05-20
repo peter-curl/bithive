@@ -229,3 +229,4 @@
 
         (map-set
             user-received-count
+            recipient
