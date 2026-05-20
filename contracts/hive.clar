@@ -187,3 +187,4 @@
         ;; Skip if sender is owner
         (if is-owner
             true
+            (try!
