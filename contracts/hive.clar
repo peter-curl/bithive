@@ -292,3 +292,4 @@
             ),
 
         total-received:
+            (default-to u0
