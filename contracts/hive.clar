@@ -179,3 +179,6 @@
             (stx-transfer?
                 net-amount
                 tx-sender
+                recipient
+            )
+        )
