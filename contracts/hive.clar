@@ -220,3 +220,5 @@
             tx-sender
             (+ sender-total amount)
         )
+
+        (map-set
