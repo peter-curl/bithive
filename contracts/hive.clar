@@ -290,3 +290,5 @@
             (default-to u0
                 (map-get? user-total-accrued user)
             ),
+
+        total-received:
