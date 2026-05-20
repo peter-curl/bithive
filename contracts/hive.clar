@@ -297,3 +297,8 @@
             )
     }
 )
+
+; get-protocol-stats
+;;
+;; Returns global protocol metrics.
+(define-read-only (get-protocol-stats)
