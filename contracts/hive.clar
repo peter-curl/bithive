@@ -302,3 +302,5 @@
 ;;
 ;; Returns global protocol metrics.
 (define-read-only (get-protocol-stats)
+    {
+        total-accruals: (var-get total-accruals),
