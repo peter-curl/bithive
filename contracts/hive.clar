@@ -275,3 +275,5 @@
 ;;
 ;; Returns protocol statistics for a user.
 (define-read-only (get-user-stats (user principal))
+    {
+        accruals-sent:
