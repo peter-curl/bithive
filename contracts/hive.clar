@@ -202,3 +202,5 @@
 
         (map-set accruals
             { accrual-id: accrual-id }
+            {
+                sender: tx-sender,
