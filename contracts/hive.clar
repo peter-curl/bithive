@@ -313,3 +313,4 @@
 ;;
 ;; Returns total accrued by a user.
 (define-read-only (get-user-total-accrued (user principal))
+    (ok
