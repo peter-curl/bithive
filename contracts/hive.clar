@@ -223,3 +223,4 @@
 
         (map-set
             user-total-received
+            recipient
