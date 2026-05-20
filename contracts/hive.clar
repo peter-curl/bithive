@@ -293,3 +293,7 @@
 
         total-received:
             (default-to u0
+                (map-get? user-total-received user)
+            )
+    }
+)
