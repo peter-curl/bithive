@@ -246,4 +246,5 @@
             total-volume
             (+ (var-get total-volume) amount)
         )
-            
+        
+        (var-set
