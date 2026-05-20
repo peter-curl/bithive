@@ -151,3 +151,4 @@
             )
 
             (recipient-count
+                (default-to u0
