@@ -224,3 +224,5 @@
         (map-set
             user-total-received
             recipient
+            (+ recipient-total amount)
+        )
