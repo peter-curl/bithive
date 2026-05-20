@@ -304,3 +304,4 @@
 (define-read-only (get-protocol-stats)
     {
         total-accruals: (var-get total-accruals),
+        total-volume: (var-get total-volume),
