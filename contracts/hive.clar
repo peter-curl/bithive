@@ -278,3 +278,5 @@
     {
         accruals-sent:
             (default-to u0
+                (map-get? user-accrual-count user)
+            ),
