@@ -167,3 +167,5 @@
         ;; Prevent self-accrual
         (asserts!
             (not (is-eq tx-sender recipient))
+            err-invalid-amount
+        )
